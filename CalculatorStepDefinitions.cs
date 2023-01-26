@@ -12,6 +12,8 @@ namespace SpecFlowCalculator.Specs.StepDefinitions
 
         private double _result;
 
+        private Exception _exception;
+
         public CalculatorStepDefinitions(ScenarioContext scenarioContext)
         {
             _scenarioContext = scenarioContext;
@@ -66,6 +68,71 @@ namespace SpecFlowCalculator.Specs.StepDefinitions
         {
             _result = _calculator.Result;
             _result.Should().Be(result);
+        }
+
+        [Given("the number is (.*)")]
+
+        public void GivenTheNumberIs(double number)
+        {
+            try
+            {
+                _calculator.ArgumentString = number.ToString();
+                _calculator.Calculate();
+            }
+            catch (Exception ex) 
+            {
+                _exception = ex;
+            }
+
+            
+        }
+
+        [Then(@"catch OU exception")]
+
+        public void ThenCatchOUException()
+        {
+            Assert.NotNull(_exception);
+            Assert.Equal(_exception.Message, "Operation Uncpecified"); 
+        }
+
+        [Given("the string is (.*)")]
+
+        public void GivenTheStringIs(string str)
+        {
+            _calculator.ArgumentString = str;
+        }
+
+
+        [When("try to add")]
+
+        public void WhenTryToAdd()
+        {
+            _calculator.CurrentOperation = Operation.Plus;
+            try
+            {
+                _calculator.Calculate();
+            }
+            catch (Exception ex)
+            {
+                _exception = ex;
+            }
+        }
+
+
+        [Then(@"catch SystemFormatException")]
+
+        public void ThenCatchSystemFormatException()
+        {
+            Assert.NotNull(_exception);
+            Assert.Equal(_exception.Message, "Input string was not in a correct format.");
+        }
+
+        [Then(@"it should be infinity")]
+
+        public void ThenItShouldBeInfinity()
+        {
+            _result = _calculator.Result;
+            _result.Should().Be(Double.PositiveInfinity);
         }
     }
 }
